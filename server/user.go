@@ -77,10 +77,19 @@ func (u *User) DoMessage(msg string) {
 			u.SendMsg("该用户名已经被使用\n")
 		}
 
+	} else if len(msg) > 4 && msg[:3] == "to|" {
+		ret := strings.Split(msg, "|")
+		userName := ret[1]
+		data := ret[2]
+		if user, ok := u.server.OnLineMap[userName]; ok {
+			user.SendMsg(data)
+		} else {
+			u.SendMsg("用户不存在")
+		}
+
 	} else {
 		u.server.BroadCast(u, msg)
 	}
-
 }
 
 //给当前User对应的客户端发送消息

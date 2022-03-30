@@ -72,7 +72,7 @@ func (s *Server) Handler(conn net.Conn) {
 			}
 
 			//提取用户的消息(去除'\n')
-			msg := string(buf[:n-1])
+			msg := string(buf[:n])
 
 			u.DoMessage(msg)
 
@@ -86,9 +86,9 @@ func (s *Server) Handler(conn net.Conn) {
 	for {
 		select {
 		case <-isAlive:
-			// 用户在线
-			fmt.Println("用户在线")
-		case <-time.After(10 * time.Second):
+			//当前用户是活跃的，应该重置定时器
+			//不做任何事情，为了激活select，更新下面的定时器
+		case <-time.After(100 * time.Second):
 			// 用户超时
 			u.SendMsg("您超时了\n")
 			//关闭资源

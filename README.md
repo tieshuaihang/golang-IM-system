@@ -19,3 +19,5 @@
 - handler 中定义 isActive channel，每次收到用户消息，就证明用户在线，往 channel中发数据
 - 使用 select 评估 定时器 和  isActive channel，每次 isActive channel 命中就会重置定时器，定时器超时，关闭连接
 - 手动关闭连接时，读取用户数据的协程会收到长度为0的数据，使用户下线
+
+### v6 客户端实现
