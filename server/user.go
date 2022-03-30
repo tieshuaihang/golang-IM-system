@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"net"
 	"strings"
 )
@@ -90,6 +91,12 @@ func (u *User) SendMsg(msg string) {
 func (u *User) ListenMessage() {
 	for {
 		msg := <-u.C
-		u.Conn.Write([]byte(msg + "\n"))
+		if msg != "" {
+			_, err := u.Conn.Write([]byte(msg + "\n"))
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
+
 	}
 }

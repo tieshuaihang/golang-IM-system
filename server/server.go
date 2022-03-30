@@ -5,6 +5,7 @@ import (
 	"io"
 	"net"
 	"sync"
+	"time"
 )
 
 type Server struct {
@@ -54,6 +55,8 @@ func (s *Server) Handler(conn net.Conn) {
 	// 用户上线
 	u.OnLine()
 
+	isAlive := make(chan struct{})
+
 	//接受客户端发送的消息
 	go func() {
 		buf := make([]byte, 512)
@@ -73,16 +76,42 @@ func (s *Server) Handler(conn net.Conn) {
 
 			u.DoMessage(msg)
 
+			// 用户的任何消息，都说明其在线
+			isAlive <- struct{}{}
+
 		}
 
 	}()
 
-	select {}
+	for {
+		select {
+		case <-isAlive:
+			// 用户在线
+			fmt.Println("用户在线")
+		case <-time.After(10 * time.Second):
+			// 用户超时
+			u.SendMsg("您超时了\n")
+			//关闭资源
+			close(u.C)
+
+			conn.Close()
+			return
+		}
+
+	}
 
 }
 
 //启动服务器的接口
 func (s *Server) Start() {
+
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Println(err)
+			return
+		}
+	}()
+
 	//socket listen
 	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", s.Ip, s.Port))
 	if err != nil {
